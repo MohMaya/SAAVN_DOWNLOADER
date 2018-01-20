@@ -100,12 +100,18 @@ var addAlbumDownloadButton = function () {
 
 	albumBtn.on('click', function () {
 
-		var songs = [];
-		$('.song-json').each(function () {
-			songs.push(JSON.parse($(this).text()))
-		});
+    var songs = [];
+    $('.song-json').each(function () {
+        songs.push(JSON.parse($(this).text()))
+    });
+        
+    songs.forEach(function(song,index){
+        song.title = (index+1).toString()+' - '+song.title;
+    })
 
-		downloadSetOfSongsAsZip(songs, songs[0].album + bitrateString);
+        
+    downloadSetOfSongsAsZip(songs, songs[0].album+' ('+songs[0].year+')');
+    	
 
 	});
 

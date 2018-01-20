@@ -192,16 +192,15 @@ var getSongBlob = function (song, songFileUrl, callback, hideInEnd, hideStatus) 
  * @param name
  */
 var downloadSetOfSongsAsZip = function (songs, name) {
-
+    
 	var zip = new JSZip();
-
+    
 	// create a folder in the name of album
 	var album = zip.folder(name);
 	var zipStat = downloadStatus.createRow();
 	var albumStatus = 'Album : ' + name + " : Download in Progress";
 	zipStat.status(albumStatus);
-
-	songs.forEach(function (song, index) {
+    songs.forEach(function (song, index) {
 
 
 		// get the download url of song
@@ -212,23 +211,25 @@ var downloadSetOfSongsAsZip = function (songs, name) {
 
 				// get a single song blob
 				getSongBlob(song, result.auth_url, function (blob) {
-					album.file(song.title + '.mp3', blob);
-
-					// check if all files are downloaded
-					if (index + 1 === songs.length) {
+                    console.log(song.title+" Downloading");
+                    album.file(song.title + '.mp3', blob);
+                    
+                    // check if all files are downloaded
+				    if (index + 1 === songs.length) {
 
 						zipStat.status("Compressing & Zipping the Downloads");
 						downloadZip(zip, name, function () {
 							zipStat.status("Download Complete", true);
 							zipStat.flushAll();
 						});
-
-
-					}
-				}, false, true);
+                    }
+                }, false, true);
+                
+                
 
 			}
 		})
+        
 
 
 	});
