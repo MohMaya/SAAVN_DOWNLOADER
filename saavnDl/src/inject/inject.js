@@ -100,18 +100,18 @@ var addAlbumDownloadButton = function () {
 
 	albumBtn.on('click', function () {
 
-    var songs = [];
-    $('.song-json').each(function () {
-        songs.push(JSON.parse($(this).text()))
-    });
-        
-    songs.forEach(function(song,index){
-        song.title = (index+1).toString()+' - '+song.title;
-    })
+        var songs = [];
+        $('.song-json').each(function () {
+            songs.push(JSON.parse($(this).text()))
+        });
 
-        
-    downloadSetOfSongsAsZip(songs, songs[0].album+' ('+songs[0].year+')');
-    	
+        songs.forEach(function(song,index){
+            song.title = (index+1).toString()+' - '+song.title;
+        })
+
+
+        downloadSetOfSongsAsZip(songs, songs[0].album+' ('+songs[0].year+')');
+
 
 	});
 
@@ -177,6 +177,7 @@ var createDownloadQuality = function () {
 			menuItem.find('.curr-down-rate').first().text(localStorage.download_bitrate + ' kbps');
 
 		});
+		console.log("Download Quality Button Created");
 		return el;
 	});
 
@@ -198,18 +199,22 @@ var createDownloadQuality = function () {
  * Run on Plugin Initialization
  */
 var initPlugin = function () {
-	addDownloadButtonToAllSongs();
+    addDownloadButtonToAllSongs();
 	addAlbumDownloadButton();
 	addPlaylistDownloadButton();
 
 	downloadStatus.create();
+    console.log("Buttons Injected");
+	
 };
 
 $(document).ready(function () {
+    console.log("Plugin Initiated");
 	initPlugin();
 
 
 	createDownloadQuality();
+    
 
 	// check if classes of the .page-wrap changes then add the buttons again
 	var OldLen = 0;

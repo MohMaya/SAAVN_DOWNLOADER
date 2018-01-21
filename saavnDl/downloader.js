@@ -5,22 +5,22 @@
  * @returns {string}
  */
 var slugify = function (text) {
-	return text.toString().toLowerCase().replace(/\s+/g, '-')// Replace spaces with -
-		.replace(/[^\w\-]+/g, '')// Remove all non-word chars
-		.replace(/\-\-+/g, '-')// Replace multiple - with single -
-		.replace(/^-+/, '')// Trim - from start of text
-		.replace(/-+$/, '');
-	// Trim - from end of text
+    return text.toString().toLowerCase().replace(/\s+/g, '-')// Replace spaces with -
+        .replace(/[^\w\-]+/g, '')// Remove all non-word chars
+        .replace(/\-\-+/g, '-')// Replace multiple - with single -
+        .replace(/^-+/, '')// Trim - from start of text
+        .replace(/-+$/, '');
+    // Trim - from end of text
 };
 
 var albumArtEnhancer = function(coverURL){
-	var tempURL = coverURL.toString();
+    var tempURL = coverURL.toString();
     tempURL = tempURL.replace("150x150","500x500");
     tempURL = tempURL.replace("50x50","500x500");
     tempURL = tempURL.replace("80x80","500x500");
     tempURL = tempURL.replace("250x250","500x500");
     tempURL = tempURL.replace("350x350","500x500");
-    
+
     return tempURL;
 }
 
@@ -31,14 +31,25 @@ var albumArtEnhancer = function(coverURL){
  * @returns {*}
  */
 var bytesToSize = function (a, b) {
-	if (0 === a)return "0 Bytes";
-	var c = 1024, d = b || 2, e = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
-		f = Math.floor(Math.log(a) / Math.log(c));
-	return parseFloat((a / Math.pow(c, f)).toFixed(d)) + " " + e[f]
+    if (0 === a)return "0 Bytes";
+    var c = 1024, d = b || 2, e = ["Bytes", "KB", "MB", "GB", "TB", "PB", "EB", "ZB", "YB"],
+        f = Math.floor(Math.log(a) / Math.log(c));
+    return parseFloat((a / Math.pow(c, f)).toFixed(d)) + " " + e[f]
 }
 
 if(!localStorage.download_bitrate) {
-	localStorage.download_bitrate = '128';
+    localStorage.download_bitrate = '128';
+}
+
+function stringToArrayBuffer(str) {
+    var buf = new ArrayBuffer(str.length);
+    var bufView = new Uint8Array(buf);
+
+    for (var i=0, strLen=str.length; i<strLen; i++) {
+        bufView[i] = str.charCodeAt(i);
+    }
+
+    return buf;
 }
 
 var bitrateString = " [" + localStorage.download_bitrate + " kbps]";
@@ -52,35 +63,35 @@ var bitrateString = " [" + localStorage.download_bitrate + " kbps]";
  */
 var getDownloadURL = function (song, bit, callback) {
 
-	if (!bit) {
-		bit = localStorage.download_bitrate;
-	}
+    if (!bit) {
+        bit = localStorage.download_bitrate;
+    }
 
-	var postData = {
-		url: song.url,
-		__call: "song.generateAuthToken",
-		_marker: "false",
-		_format: "json",
-		bitrate: bit
-	};
+    var postData = {
+        url: song.url,
+        __call: "song.generateAuthToken",
+        _marker: "false",
+        _format: "json",
+        bitrate: bit
+    };
 
-	$.ajax({
-		type: "POST",
-		url: "https://www.saavn.com/api.php",
-		crossDomain: true,
-		dataType: "json",
-		data: postData,
-		xhrFields: {
-			withCredentials: true
-		},
-		success: function (result, status) {
-			callback(result, 'success');
-		},
-		error: function (result, status) {
-			console.log(result);
-			callback(result, 'error');
-		}
-	})
+    $.ajax({
+        type: "POST",
+        url: "https://www.saavn.com/api.php",
+        crossDomain: true,
+        dataType: "json",
+        data: postData,
+        xhrFields: {
+            withCredentials: true
+        },
+        success: function (result, status) {
+            callback(result, 'success');
+        },
+        error: function (result, status) {
+            ////console.log(result);
+            callback(result, 'error');
+        }
+    })
 };
 
 /**
@@ -92,32 +103,32 @@ var getDownloadURL = function (song, bit, callback) {
  */
 var getURLArrayBuffer = function (url, onload, statusObject) {
 
-	const xhr = new XMLHttpRequest();
-	xhr.open('GET', url, true);
-	xhr.responseType = 'arraybuffer';
+    const xhr = new XMLHttpRequest();
+    xhr.open('GET', url, false);
+    xhr.responseType = 'arraybuffer';
 
-	if (statusObject) {
-		singleShowSingleSongProgress(xhr, statusObject);
-	}
+    if (statusObject) {
+        singleShowSingleSongProgress(xhr, statusObject);
+    }
 
-	xhr.onload = function () {
-		if (xhr.status === 200) {
+    xhr.onload = function () {
+        if (xhr.status === 200) {
 
-			if(statusObject) {
-				statusObject.flush();
-			}
+            if(statusObject) {
+                statusObject.flush();
+            }
 
-			onload(xhr.response);
-		} else {
-			console.error(xhr.statusText + ' (' + xhr.status + ')');
-		}
-	};
+            onload(stringToArrayBuffer(xhr.response));
+        } else {
+            console.error(xhr.statusText + ' (' + xhr.status + ')');
+        }
+    };
 
-	xhr.onerror = function () {
-		console.error('Network error');
-	};
+    xhr.onerror = function () {
+        console.error('Network error');
+    };
 
-	xhr.send();
+    xhr.send();
 };
 
 /**
@@ -127,10 +138,10 @@ var getURLArrayBuffer = function (url, onload, statusObject) {
  * @param callback
  */
 var downloadWithData = function (song, songFileUrl, callback) {
-	getSongBlob(song, songFileUrl, function (blob) {
-		saveAs(blob, song.title + '.mp3');
-		callback();
-	}, true);
+    getSongBlob(song, songFileUrl, function (blob) {
+        saveAs(blob, song.title + '.mp3');
+        callback();
+    }, true);
 
 };
 
@@ -144,44 +155,44 @@ var downloadWithData = function (song, songFileUrl, callback) {
  */
 var getSongBlob = function (song, songFileUrl, callback, hideInEnd, hideStatus) {
 
-	var songStatus = downloadStatus.createRow();
+    var songStatus = downloadStatus.createRow();
 
-	if(hideStatus) {
-		songStatus.hide();
-	}
-	songStatus.status('Downloading Album Artwork');
+    if(hideStatus) {
+        songStatus.hide();
+    }
+    songStatus.status('Downloading Album Artwork');
     song.image_url = albumArtEnhancer(song.image_url);
-	getURLArrayBuffer(song.image_url, function (coverArrayBuffer) {
+    getURLArrayBuffer(song.image_url, function (coverArrayBuffer) {
 
-		songStatus.status('Downloading Song : ' + song.title);
+        songStatus.status('Downloading Song : ' + song.title);
 
-		getURLArrayBuffer(songFileUrl, function (arrayBuffer) {
+        getURLArrayBuffer(songFileUrl, function (arrayBuffer) {
 
-			const writer = new ID3Writer(arrayBuffer);
-			writer.setFrame('TIT2', song.title)
-				.setFrame('TPE1', song.singers.split(', '))
-				.setFrame('TCOM', [song.music])
-				.setFrame('TALB', song.album)
-				.setFrame('TYER', song.year)
-				.setFrame('TPUB', song.label)
-				.setFrame('TCON', ['Soundtrack'])
-				.setFrame('TBPM', 128)
-				.setFrame('APIC', {
-					type: 3,
-					data: coverArrayBuffer,
-					description: song.title
-				});
+            const writer = new ID3Writer(arrayBuffer);
+            writer.setFrame('TIT2', song.title)
+                .setFrame('TPE1', song.singers.split(', '))
+                .setFrame('TCOM', [song.music])
+                .setFrame('TALB', song.album)
+                .setFrame('TYER', song.year)
+                .setFrame('TPUB', song.label)
+                .setFrame('TCON', ['Soundtrack'])
+                .setFrame('TBPM', 128)
+                .setFrame('APIC', {
+                    type: 3,
+                    data: coverArrayBuffer,
+                    description: song.title
+                });
 
-			writer.addTag();
+            writer.addTag();
 
-			const blob = writer.getBlob();
+            const blob = writer.getBlob();
 
-			songStatus.status('Downloaded : ' + song.title, hideInEnd);
-			callback(blob);
+            songStatus.status('Downloaded : ' + song.title, hideInEnd);
+            callback(blob);
 
-		}, songStatus)
+        }, songStatus)
 
-	});
+    });
 };
 
 
@@ -192,47 +203,47 @@ var getSongBlob = function (song, songFileUrl, callback, hideInEnd, hideStatus) 
  * @param name
  */
 var downloadSetOfSongsAsZip = function (songs, name) {
-    
-	var zip = new JSZip();
-    
-	// create a folder in the name of album
-	var album = zip.folder(name);
-	var zipStat = downloadStatus.createRow();
-	var albumStatus = 'Album : ' + name + " : Download in Progress";
-	zipStat.status(albumStatus);
+
+    var zip = new JSZip();
+
+    // create a folder in the name of album
+    var album = zip.folder(name);
+    var zipStat = downloadStatus.createRow();
+    var albumStatus = 'Album : ' + name + " : Download in Progress";
+    zipStat.status(albumStatus);
     songs.forEach(function (song, index) {
 
 
-		// get the download url of song
-		getDownloadURL(song, false, function (result, status) {
+        // get the download url of song
+        getDownloadURL(song, false, function (result, status) {
 
-			if (status === 'success') {
+            if (status === 'success') {
 
 
-				// get a single song blob
-				getSongBlob(song, result.auth_url, function (blob) {
-                    console.log(song.title+" Downloading");
+                // get a single song blob
+                getSongBlob(song, result.auth_url, function (blob) {
+                    //console.log(song.title+" Downloading");
                     album.file(song.title + '.mp3', blob);
-                    
-                    // check if all files are downloaded
-				    if (index + 1 === songs.length) {
 
-						zipStat.status("Compressing & Zipping the Downloads");
-						downloadZip(zip, name, function () {
-							zipStat.status("Download Complete", true);
-							zipStat.flushAll();
-						});
+                    // check if all files are downloaded
+                    if (index + 1 === songs.length) {
+
+                        zipStat.status("Compressing & Zipping the Downloads");
+                        downloadZip(zip, name, function () {
+                            zipStat.status("Download Complete", true);
+                            zipStat.flushAll();
+                        });
                     }
                 }, false, true);
-                
-                
-
-			}
-		})
-        
 
 
-	});
+
+            }
+        })
+
+
+
+    });
 
 
 };
@@ -243,73 +254,73 @@ var downloadSetOfSongsAsZip = function (songs, name) {
  */
 // TODO : Bug when downloading Albums.. or Playlist
 var downloadStatus = function () {
-	var downStatus, downStatusWrapper;
+    var downStatus, downStatusWrapper;
 
-	return {
+    return {
 
-		create: function () {
-			$('.download-status-wrapper').remove();
-			downStatusWrapper = $('<div class="download-status-wrapper"></div>');
-			$('#player').prepend(downStatusWrapper);
-		},
-		createRow : function () {
-			downStatus = $('<div class="download-status"> <span class="progress"></span><p class="status-text"></p><p class="status-right"></p></div>');
-			downStatus.hide();
-			downStatusWrapper.append(downStatus);
+        create: function () {
+            $('.download-status-wrapper').remove();
+            downStatusWrapper = $('<div class="download-status-wrapper"></div>');
+            $('#player').prepend(downStatusWrapper);
+        },
+        createRow : function () {
+            downStatus = $('<div class="download-status"> <span class="progress"></span><p class="status-text"></p><p class="status-right"></p></div>');
+            downStatus.hide();
+            downStatusWrapper.append(downStatus);
 
-			return this;
-		},
-		el: function () {
-			return downStatus;
-		},
-		hide: function () {
-			downStatus.hide();
-		},
-		show: function () {
-			downStatus.show();
-		},
-		progress: function (value) {
-			downStatus.find('.progress').first().width(value + "%")
-		},
-		clear: function () {
-			downStatus.find('p.status-text').first().html("");
-			downStatus.find('p.status-right').first().html("");
-		},
-		reset: function () {
-			this.clear();
-			this.hide();
-			this.progress(0);
-		},
-		flush : function () {
-			downStatus.remove();
-		},
-		flushAll : function () {
-			$('.download-status').remove();
-		},
-		status: function (message, hide) {
-			this.show();
+            return this;
+        },
+        el: function () {
+            return downStatus;
+        },
+        hide: function () {
+            downStatus.hide();
+        },
+        show: function () {
+            downStatus.show();
+        },
+        progress: function (value) {
+            downStatus.find('.progress').first().width(value + "%")
+        },
+        clear: function () {
+            downStatus.find('p.status-text').first().html("");
+            downStatus.find('p.status-right').first().html("");
+        },
+        reset: function () {
+            this.clear();
+            this.hide();
+            this.progress(0);
+        },
+        flush : function () {
+            downStatus.remove();
+        },
+        flushAll : function () {
+            $('.download-status').remove();
+        },
+        status: function (message, hide) {
+            this.show();
 
-			if (hide) {
-				this.reset();
-				this.flush();
-			}
-			else {
-				downStatus.find('p.status-text').first().html(message + "<span>.</span><span>.</span><span>.</span>")
-			}
-		},
-		statusRight: function (message, hide) {
-			var self = this;
+            if (hide) {
+                this.reset();
+                this.flush();
+            }
+            else {
+                downStatus.find('p.status-text').first().html(message + "<span>.</span><span>.</span><span>.</span>")
+            }
+        },
+        statusRight: function (message, hide) {
+            var self = this;
 
-			if (hide) {
-				this.progress(100);
-				setTimeout(function () {
-					self.reset();
-				}, 1500);
-			}
+            if (hide) {
+                this.progress(100);
+                setTimeout(function () {
+                    self.reset();
+                }, 1500);
+            }
 
-			downStatus.find('p.status-right').first().html(message)
-		}
-	}
+            downStatus.find('p.status-right').first().html(message)
+        }
+    }
 
 }();
 
@@ -322,11 +333,11 @@ var downloadStatus = function () {
  * @param callback
  */
 var downloadZip = function (zip, name, callback) {
-	zip.generateAsync({type: "blob"})
-		.then(function (blob) {
-			saveAs(blob, name);
-			callback();
-		});
+    zip.generateAsync({type: "blob"})
+        .then(function (blob) {
+            saveAs(blob, name);
+            callback();
+        });
 };
 
 /**
@@ -336,22 +347,22 @@ var downloadZip = function (zip, name, callback) {
  * @param statusObject
  */
 var singleShowSingleSongProgress = function (xhr, statusObject) {
-	xhr.addEventListener("progress", updateProgress);
-	xhr.addEventListener("load", transferComplete);
+    xhr.addEventListener("progress", updateProgress);
+    xhr.addEventListener("load", transferComplete);
 
-	function updateProgress(e) {
+    function updateProgress(e) {
 
-		var percentComplete = e.loaded / e.total;
+        var percentComplete = e.loaded / e.total;
 
-		if(statusObject) {
-			statusObject.statusRight(bytesToSize(e.loaded, 2) + "/" + bytesToSize(e.total, 2));
-			statusObject.progress(percentComplete * 100);
-		}
+        if(statusObject) {
+            statusObject.statusRight(bytesToSize(e.loaded, 2) + "/" + bytesToSize(e.total, 2));
+            statusObject.progress(percentComplete * 100);
+        }
 
-	}
+    }
 
-	function transferComplete(e) {
-		statusObject.reset();
-		statusObject.flush();
-	}
+    function transferComplete(e) {
+        statusObject.reset();
+        statusObject.flush();
+    }
 };
